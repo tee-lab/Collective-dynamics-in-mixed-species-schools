@@ -32,8 +32,7 @@ Four species pairs were tested, each with three treatments (species A alone, spe
 | NT - ST      | `NT16`, `ST16`   | `NT8ST8` |
 | NT - RET     | `NT16`, `RET16`  | `NT8RET8` |
 
-TB = tiger barbs, RB = rosy barbs; BPT, ST, NT and RET are the other four species.
-
+TB = tiger barbs, RB = rosy barbs; BPT = black phantom tetra; ST = serape tetra; NT = neon tetra; and RET = red eye tetra.
 ---
 
 ## `<treatment>_<replicate>_traj_bl.npz`
