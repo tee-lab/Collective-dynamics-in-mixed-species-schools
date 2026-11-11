@@ -1,79 +1,208 @@
-# Mixed-species fish schools: group properties (group size 16)
+# Mixed-species fish schools: group properties
 
-Analysis code for the trajectories of fish schools of 16 individuals, swimming either as a single species (16 fish of one species) or as a mixed-species school (8 + 8 fish of two species).
-For each school we compute individual speed, group polarization, nearest-neighbour distance and the distance between the two species' subgroups, and compare the experiments with a mixed-species schooling model.
+This repository contains Jupyter Notebooks used for the analysis of single- and mixed-species fish schools (group size 16) in:
+
+> Tiwari et al. *Contrasting collective dynamics in mixed-species fish schools*.
+
+---
+
+# Notebooks
+
+| Notebook | Description |
+| -------- | ----------- |
+| `single species group properties.ipynb` | Compares real data with the single-species model for all six species: individual speed, group polarization and nearest-neighbour distance |
+| `mixed_species_group_properties.ipynb` | Computes group properties of the mixed-species schools: speed of the two species subgroups, polarization of the subgroups, the whole group and a random subgroup, and the distance between the two subgroup centroids against a label-shuffle null |
+| `mixed_species_model_group_properties.ipynb` | Same group properties for the mixed-species model, with the non-dimensional interaction strengths of each pair; one figure each for the fitted weights and for all cross-species weights set to 0 and to 1 |
+| `boundary_effect.ipynb` | Tests how much the distributions depend on data recorded near the arena wall by removing the outer 25 % of the arena area, with the Hellinger distance between the two distributions |
+
+---
+
+# Data
+
+## Source
+
+The datasets contain processed trajectories derived from raw tracking data; available at **([Zenodo](<link>))**
 
 Four species pairs were tested, each with three treatments (species A alone, species B alone, 8 A + 8 B):
 
 | Pair (A - B) | Single species | Mixed |
-|---|---|---|
-| TB - RB | TB16, RB16 | TB8RB8 |
-| BPT - ST | BPT16, ST16 | BPT8ST8 |
-| NT - ST | NT16, ST16 | NT8ST8 |
-| NT - RET | NT16, RET16 | NT8RET8 |
+| ------------ | -------------- | ----- |
+| TB - RB      | `TB16`, `RB16`   | `TB8RB8` |
+| BPT - ST     | `BPT16`, `ST16`  | `BPT8ST8` |
+| NT - ST      | `NT16`, `ST16`   | `NT8ST8` |
+| NT - RET     | `NT16`, `RET16`  | `NT8RET8` |
 
-Species A is always the first species of the pair (orange in the figures), species B the second (blue).
+TB = tiger barbs, RB = rosy barbs; BPT, ST, NT and RET are the other four species.
 
-## Repository layout
+---
 
-```
-Code/       Jupyter notebooks (one per figure set)
-Data/       trajectories and model output (see below)
-Results/    figures written by the notebooks (PNG and PDF, 300 dpi)
-```
+## `<treatment>_<replicate>_traj_bl.npz`
 
-Every notebook reads from `../Data` and writes to `../Results`, so run them from inside `Code/`.
+*Input for all four notebooks* (single-species files: `TB16`, `RB16`, `BPT16`, `ST16`, `NT16`, `RET16`; mixed files: `BPT8ST8`, `NT8ST8`, `NT8RET8`)
 
-## Data
+| Key          | Shape                            | Description                                                        |
+| ------------ | -------------------------------- | ------------------------------------------------------------------ |
+| `positions`  | `(frames, individuals, 2)`       | x, y position in body lengths (BL); untracked fish are `NaN`       |
+| `velocities` | `(frames, individuals, 2)`       | x, y velocity in body lengths per second (BL/s)                    |
 
-All positions are in body lengths (BL), speeds in BL/s; videos were recorded at 25 frames per second.
+In the mixed files the **first 8 individuals are species A** (BPT or NT).
 
-| File(s) | Content |
-|---|---|
-| `<SP>16_<rep>_traj_bl.npz` | Single-species trials (TB, RB: 5 replicates; BPT, ST, NT: 10; RET: 12, of which 1-10 are used). Arrays `positions` and `velocities`, shape (frames, 16, 2); untracked fish are NaN. |
-| `<A>8<B>8_<rep>_traj_bl.npz` | Mixed trials (BPT8ST8, NT8ST8: 10 replicates; NT8RET8: 12). Same arrays; the **first 8 fish are species A** (BPT or NT). |
-| `TBRB16_traj_bl.csv` | Mixed TB8 + RB8 trials (5 replicates, 200 frames each, 1000 frames in total) with the species of every fish preserved. Columns `Replicate, FrameID, FishID, SPECIES ID, body_length, x, y, vx, vy` (16 rows per frame). Used for this pair instead of `TB8RB8_*_traj_bl.npz`, where the species of each fish is not preserved. |
-| `MS_<rep>_RB8+TB8_c<clip>_<TB/RB>1.csv` | Single-fish trajectories from the TB8 + RB8 trials (5 replicates x 5 clips x one TB and one RB fish). Not used by the notebooks below. |
-| `model_single_species.h5` | Single-species model runs: `/<SP>/run_<i>/{t, x, y, v, phi}`; species parameters and `transient_s` stored as attributes of `/<SP>`. |
-| `model_mixed_species.h5` | Mixed-species model runs with the fitted cross-species weights: `/<A>_<B>/run_<i>/{t, x, y, v, phi, species}` (species 0 = A, 1 = B); parameters of both species (`A_mu0`, `A_mu_sm`, ...), cross-species weights (`w_sm_AB`, `w_al_BA`, ...) and `transient_s` as attributes of `/<A>_<B>`. |
-| `model_mixed_species_w0.h5`, `model_mixed_species_w1.h5` | Same, with all cross-species weights set to 0 (species ignore each other) and to 1 (a heterospecific neighbour counts like a conspecific one). |
-| `singlesp-params.toml`, `mixsp-params.toml` | Parameter files the model runs were generated from (the notebooks read the parameters from the h5 attributes). |
+---
 
-## Notebooks
+## `TBRB16_traj_bl.csv`
 
-### `single species group properties.ipynb`
-Real data vs the single-species model for all six species (columns TB, RB, BPT, ST, NT, RET).
-Rows: individual speed, group polarization and nearest-neighbour distance (NND), as probability density histograms (data solid, model dashed).
-Velocity is computed from the positions by central difference; polarization $m = |\frac{1}{n}\sum_i \mathbf{v}_i/|\mathbf{v}_i||$ over the fish present (at least 8); NND in frames with at least 75 % of the fish tracked. Model frames before the transient are dropped.
-Output: `single_species_group_properties_gs16`.
+*Input for `mixed_species_group_properties.ipynb` and `boundary_effect.ipynb` (TB8 + RB8 trials)*
 
-### `mixed_species_group_properties.ipynb`
-Mixed-species experiments, one column per pair. Rows:
-1. individual speed of the two species subgroups and the whole group, with box plots;
-2. polarization of the two subgroups, the whole group and a random subgroup (8 fish chosen at random in every frame, ignoring species);
-3. distance between the centroids of the two species' subgroups, observed vs a null in which the species labels are shuffled 1000 times per frame.
+| Column        | Description                                             |
+| ------------- | ------------------------------------------------------- |
+| `Replicate`   | Replicate (5 replicates, 200 frames each)               |
+| `FrameID`     | Frame index                                             |
+| `FishID`      | Fish ID                                                 |
+| `SPECIES ID`  | Species identity (TB = tiger barbs, RB = rosy barbs)    |
+| `body_length` | Body length                                             |
+| `x`, `y`      | Position (BL)                                           |
+| `vx`, `vy`    | Velocity (BL/s)                                         |
 
-Frames need at least 75 % of the fish tracked. The 1000-shuffle null makes this the slowest notebook (a few minutes).
-Output: `mixed_species_group_properties_gs16`.
+---
 
-### `mixed_species_model_group_properties.ipynb`
-The same rows for the model, preceded by a row of non-dimensional interaction strengths: conspecific ($\hat\mu_{AA}$, $\hat\mu_{BB}$) vs heterospecific ($\hat\mu_{AB}$, $\hat\mu_{BA}$) for speed matching, alignment and attraction,
-$\hat\mu^{c}_{ij} = w^{c}_{ij}\mu^{c}_i/\mu_{0,i}$ (speed matching, alignment) and $\hat\mu^{\rm at}_{ij} = \sqrt{w^{\rm at}_{ij}\mu^{\rm at}_i}/\mu_{0,i}$ (attraction), with $w_{ii} = 1$.
-The centroid-distance null splits the 16 fish at random into two groups of 8 in every frame.
-One figure per model file: `mixed_species_model_group_properties_gs16` (fitted weights), `mixed_species_model_w0_group_properties_gs16` and `mixed_species_model_w1_group_properties_gs16`.
+## `model_single_species.h5`
 
-### `boundary_effect.ipynb`
-Checks how much the results depend on data recorded close to the arena wall. Every distribution is drawn twice: with all data and with the outer 25 % of the arena area removed (the wall of each trial is its outermost tracked point $R$; the cut keeps everything within $R\sqrt{0.75}$). Speed and NND are filtered by the fish's distance from the centre, polarization and centroid distance by the group centroid's distance. The Hellinger distance $H$ between the two distributions (0 = identical, 1 = no overlap) is shown above each panel.
-Outputs: `boundary_effect_single_species_gs16` (speed, polarization, NND for the six species) and `boundary_effect_mixed_species_gs16` (speed, polarization, NND and centroid distance for the four pairs).
+*Input for `single species group properties.ipynb`*
 
-## Requirements
+| Path                                  | Description                                                        |
+| ------------------------------------- | ------------------------------------------------------------------ |
+| `/<SP>/run_<i>/t`                     | Time (s), one frame every 0.04 s                                   |
+| `/<SP>/run_<i>/x`, `y`                | Positions (BL), shape `(frames, individuals)`                      |
+| `/<SP>/run_<i>/v`, `phi`              | Speed (BL/s) and heading (rad), shape `(frames, individuals)`      |
+| attributes of `/<SP>`                 | Model parameters and `transient_s` (initial transient, dropped)    |
 
-Python 3.10 or later with `numpy`, `pandas`, `matplotlib`, `h5py` and `jupyter`:
+---
+
+## `model_mixed_species.h5`, `model_mixed_species_w0.h5`, `model_mixed_species_w1.h5`
+
+*Input for `mixed_species_model_group_properties.ipynb`* (fitted cross-species weights; all weights 0; all weights 1)
+
+| Path                                  | Description                                                        |
+| ------------------------------------- | ------------------------------------------------------------------ |
+| `/<A>_<B>/run_<i>/t, x, y, v, phi`    | As in the single-species file                                      |
+| `/<A>_<B>/run_<i>/species`            | Species of each individual (0 = A, 1 = B)                          |
+| attributes of `/<A>_<B>`              | Parameters of both species (`A_mu0`, `A_mu_sm`, `A_mu_al`, `A_mu_at`, ...), cross-species weights (`w_sm_AB`, `w_al_BA`, ...) and `transient_s` |
+
+---
+
+## ⚙️ How to Run
+
+### Requirements
 
 ```bash
 pip install numpy pandas matplotlib h5py jupyter
-cd Code
-jupyter nbconvert --to notebook --execute --inplace mixed_species_group_properties.ipynb   # or open the notebooks in Jupyter
 ```
 
-Figures use Arial if it is installed (otherwise Liberation Sans or DejaVu Sans) and are sized for an A4 page width.
+All notebooks are in `Code/`, read the data from `../Data` and save the figures to `../Results`.
+
+---
+
+### Notebook 1 — Single species group properties
+1. Place the single-species `*16_*_traj_bl.npz` files and `model_single_species.h5` in `Data/`.
+2. Run:
+
+   ```bash
+   jupyter notebook "single species group properties.ipynb"
+   ```
+3. Execute all cells.
+
+---
+
+### Notebook 2 — Mixed species group properties
+1. Place the mixed `*8*8_*_traj_bl.npz` files and `TBRB16_traj_bl.csv` in `Data/`.
+2. Run:
+
+   ```bash
+   jupyter notebook mixed_species_group_properties.ipynb
+   ```
+3. Execute all cells (the 1000-shuffle null takes a few minutes).
+
+---
+
+### Notebook 3 — Mixed species model group properties
+1. Place `model_mixed_species.h5`, `model_mixed_species_w0.h5` and `model_mixed_species_w1.h5` in `Data/`.
+2. Run:
+
+   ```bash
+   jupyter notebook mixed_species_model_group_properties.ipynb
+   ```
+3. Execute all cells.
+
+---
+
+### Notebook 4 — Boundary effect
+1. Place all `*_traj_bl.npz` files and `TBRB16_traj_bl.csv` in `Data/`.
+2. Run:
+
+   ```bash
+   jupyter notebook boundary_effect.ipynb
+   ```
+3. Execute all cells.
+
+---
+
+## Outputs
+
+All figures are saved as PNG and PDF (300 dpi, A4 width).
+
+### Single species group properties notebook
+
+| Figure | Description | File |
+| ------ | ----------- | ---- |
+| Fig. 1 | Speed, polarization and nearest-neighbour distance, data vs model, for the six species | `single_species_group_properties_gs16` |
+
+---
+
+### Mixed species group properties notebook
+
+| Figure | Description | File |
+| ------ | ----------- | ---- |
+| Fig. 1 | Speed, polarization (with random subgroup) and subgroup centroid distance (with null) for the four pairs | `mixed_species_group_properties_gs16` |
+
+---
+
+### Mixed species model group properties notebook
+
+| Figure | Description | File |
+| ------ | ----------- | ---- |
+| Fig. 1 | Interaction strengths, speed, polarization and centroid distance, fitted weights | `mixed_species_model_group_properties_gs16` |
+| Fig. 2 | Same, all cross-species weights 0 | `mixed_species_model_w0_group_properties_gs16` |
+| Fig. 3 | Same, all cross-species weights 1 | `mixed_species_model_w1_group_properties_gs16` |
+
+---
+
+### Boundary effect notebook
+
+| Figure | Description | File |
+| ------ | ----------- | ---- |
+| Fig. 1 | Speed, polarization and NND, all data vs outer 25 % of the area removed, single species | `boundary_effect_single_species_gs16` |
+| Fig. 2 | Speed, polarization, NND and centroid distance, all data vs outer 25 % removed, mixed species | `boundary_effect_mixed_species_gs16` |
+
+---
+
+## Notes
+
+- A `treatment` is the group composition (e.g. `TB16`, `TB8RB8`) and a `replicate` is an independent experimental trial. RB and TB have 5 replicates per treatment, the other species 10 (RET16 and NT8RET8 have 12 files; RET16 replicates 1-10 are used in the single-species notebook).
+- Species A is always the first species of a pair (orange in the figures), species B the second (blue).
+- Polarization, nearest-neighbour distance and centroid distance use only frames with at least 75 % of the fish (or of each subgroup) tracked; files with less than 1 % tracked positions are skipped.
+- Model frames before `transient_s` are discarded.
+- The arena wall in the boundary analysis is the outermost tracked point $R$ of each trial; removing the outer 25 % of the area keeps data within $R\sqrt{0.75}$.
+
+---
+
+## Reproducibility
+
+- The experimental null model shuffles species identities among the tracked fish 1000 times per frame; the model null splits the 16 fish at random into two groups of 8 in every frame.
+- The random subgroup is 8 fish chosen at random in every frame, ignoring species.
+- Random seeds are fixed in the notebooks (`numpy.random.default_rng(0)` and `(1)`), so the figures are reproducible.
+
+---
+
+## Contact
+
+For questions or collaboration, please contact the author.
