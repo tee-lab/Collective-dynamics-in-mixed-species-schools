@@ -19,10 +19,6 @@ This repository contains Jupyter Notebooks used for the analysis of single- and 
 
 # Data
 
-## Source
-
-The datasets contain processed trajectories derived from raw tracking data; available at **([Zenodo](<https://zenodo.org/uploads/24128816>))**
-
 Four species pairs were tested, each with three treatments (species A alone, species B alone, 8 A + 8 B):
 
 | Pair (A - B) | Single species | Mixed |
