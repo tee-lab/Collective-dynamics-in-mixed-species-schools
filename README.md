@@ -2,7 +2,7 @@
 
 This repository contains Jupyter Notebooks used for the analysis of single- and mixed-species fish schools (group size 16) in:
 
-> Tiwari et al. *Contrasting collective dynamics in mixed-species fish schools*.
+*Contrasting collective dynamics in mixed-species fish schools*.
 
 ---
 
