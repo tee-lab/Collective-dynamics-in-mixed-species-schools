@@ -1,0 +1,39 @@
+[TB_RB]
+A = "TB"
+B = "RB"
+w_sm_AB = 0.4
+w_al_AB = 0.4
+w_at_AB = 0.4
+w_sm_BA = 0.4
+w_al_BA = 0.4
+w_at_BA = 0.4
+
+[BPT_ST]
+A = "BPT"
+B = "ST"
+w_sm_AB = 1.0
+w_al_AB = 0.6
+w_at_AB = 0.6
+w_sm_BA = 1.0
+w_al_BA = 0.6
+w_at_BA = 0.6
+
+[NT_ST]
+A = "NT"
+B = "ST"
+w_sm_AB = 0.1
+w_al_AB = 0.1
+w_at_AB = 0.1
+w_sm_BA = 0.1
+w_al_BA = 0.1
+w_at_BA = 0.1
+
+[NT_RET]
+A = "NT"
+B = "RET"
+w_sm_AB = 1.0
+w_al_AB = 0.1
+w_at_AB = 0.1
+w_sm_BA = 0.1
+w_al_BA = 0.1
+w_at_BA = 0.1
